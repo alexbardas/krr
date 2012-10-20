@@ -15,20 +15,31 @@ def parse_formula(formula):
     :params list formula: a list of strings forming a formula
     """
     assert isinstance(formula, list)
-
+    #print formula
     length = len(formula)
     for idx in xrange(0, len(formula)):
         try:
             if formula[idx].startswith('('):
                 formula = match_parentheses(formula, idx)
-                #print idx, formula[idx],': ', formula
-                formula = formula[:idx] + parse_formula(formula[idx].split(' ')[1:]) + \
-                            formula[idx+1:]
+                # After we grup a part of the formula, which is between
+                # brackets into a single position, a new `inside_formula` is
+                # formed at that position
+                # For evaluating that and adding the necessary brackets to it
+                # we must recursively evaluate it (and also another sub formula)
+                # which may be trapped in it
+                inside_formula = formula[idx].split(' ')
+                assert inside_formula[0].startswith('(')
+                assert inside_formula[-1].endswith(')')
+                inside_formula[0] = inside_formula[0][1:]
+                inside_formula[-1] = inside_formula[-1][:-1]
+                formula = formula[:idx] + parse_formula(inside_formula) + \
+                        formula[idx+1:]
         except IndexError, e:
             # We are at the end of the formula and some open parentheses were
             # found
             pass
 
+    print formula
     for token in priority:
         while 1:
             if token == 'not':
