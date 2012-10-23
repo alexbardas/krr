@@ -104,6 +104,19 @@ def test():
                          FTree('or',
                                left=FTree('and', left=FTree('p'), right=FTree('q')),
                                right=FTree('and', left=FTree('q'), right=FTree('r'))))
+    assert FTree.compare(f('(((p and (not q)) -> s) <-> (t or r))'),
+                         FTree('<->',
+                               left=FTree('->',
+                                          left=FTree('and',
+                                                     left=FTree('p'),
+                                                     right=FTree('not', left=FTree('q'))),
+                                          right=FTree('s')),
+                               right=FTree('or', left=FTree('t'), right=FTree('r'))))
+    assert FTree.compare(f('((not (p or r)) or (not q))'),
+                         FTree('or',
+                               left=FTree('not',
+                                          left=FTree('or', left=FTree('p'), right=FTree('r'))),
+                               right=FTree('not', left=FTree('q'))))
 
 
 def main():
