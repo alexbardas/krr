@@ -4,6 +4,8 @@ priority = ['not', 'and', 'or', '->', '<->']
 
 tree = {}
 
+propositions = [] # the set of propositions for each formula
+
 def read_formulas(input):
     """
     Given an input file, read multiple formulas from it
@@ -24,10 +26,13 @@ def read_formulas(input):
     for line in lines:
         formula = ''
         iterator = iter(line)
+
+        prop = set()
         ws = ''
         for c in iterator:
             if c in ['p', 'q', 'r', 's', 't', 'u', 'v']:
                 formula += ws + c
+                prop.add(c)
             elif c == ' ':
                 continue
             elif c == '\n':
@@ -47,6 +52,7 @@ def read_formulas(input):
             ws = '' if c == '(' else ' '
 
         formulas.append(formula)
+        propositions.append(prop)
     f.close()
 
     return formulas
