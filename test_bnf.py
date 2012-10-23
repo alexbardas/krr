@@ -1,4 +1,4 @@
-from bnf import match_parentheses, add_parentheses, parse_formula
+from bnf import match_parentheses, add_parentheses, parse_formula, evaluate, FTree
 
 formulas = \
     [
@@ -85,6 +85,25 @@ def test():
 
     print  f(formulas[3].split(' '))
     assert f(formulas[3].split(' ')) == ['((p and (q or (r and (s or t)))) <-> (not (p -> (q or r))))']
+
+
+    print '\n'
+    print 'Testing evaluate()'
+    f = evaluate
+    assert FTree.compare(f('(p and q)'), FTree('and', left=FTree('p'), right=FTree('q')))
+    assert FTree.compare(f('(not p)'), FTree('not', left=FTree('p')))
+    assert FTree.compare(f('((p and q) or p)'),
+                         FTree('or',
+                               left=FTree('and', left=FTree('p'), right=FTree('q')),
+                               right=FTree('p')))
+    assert FTree.compare(f('(p or (q and r))'),
+                         FTree('or',
+                               left=FTree('p'),
+                               right=FTree('and', left=FTree('q'), right=FTree('r'))))
+    assert FTree.compare(f('((p and q) or (q and r))'),
+                         FTree('or',
+                               left=FTree('and', left=FTree('p'), right=FTree('q')),
+                               right=FTree('and', left=FTree('q'), right=FTree('r'))))
 
 
 def main():
