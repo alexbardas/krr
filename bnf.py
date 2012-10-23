@@ -64,16 +64,16 @@ def parse_formula(formula):
     assert isinstance(formula, list)
 
     length = len(formula)
-    for idx in xrange(0, len(formula)):
+    for idx in range(0, len(formula)):
         try:
             if formula[idx].startswith('('):
                 formula = match_parentheses(formula, idx)
                 # After we grup a part of the formula, which is between
                 # brackets into a single position, a new `inside_formula` is
                 # formed at that position
-                # For evaluating that and adding the necessary brackets to it
-                # we must recursively evaluate it (and also another sub formula)
-                # which may be trapped in it
+                # Also, for adding the necessary brackets to it we must
+                # recursively evaluate it (obtaining another `sub-formula`
+                # which may be trapped in it)
                 inside_formula = formula[idx].split(' ')
                 assert inside_formula[0].startswith('(')
                 assert inside_formula[-1].endswith(')')
