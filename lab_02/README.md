@@ -16,5 +16,5 @@ Backus-Naur Form syntax:
 
 ### How to run
 
-`program`: python bnf.py input.txt
-`tests`: python test_bnf.py
+	`program`: python bnf.py input.txt
+	`tests`: python test_bnf.py
