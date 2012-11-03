@@ -1,0 +1,45 @@
+
+<!-- saved from url=(0075)http://cs.curs.pub.ro/2012/pluginfile.php/4480/mod_assign/intro/lab1krr.scm -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">; KRR / RC - Lab 1
+
+; en
+
+; 1. eliminate the duplicates from a list - 2p
+; (nodup '(1 2 4 2 3)) -&gt; (1 2 4 3) -&gt; bonus 0.5p
+;                      -&gt; (1 4 2 3)
+
+; 2. implement insertion sort, with the comparator given as a parameter - 2p
+; (isortc &lt; '(1 4 2 8 5 3)) -&gt; (1 2 3 4 5 8)
+; (isortc &gt; '(1 4 2 8 5 3)) -&gt; (8 5 4 3 2 1)
+
+; 3. write a function that returns all the prime numbers from a given interval - 3p
+; (primes 5 19) -&gt; (5 7 11 13 17)
+
+; 4. write a function that determines the decomposition of a given number into prime factors. - 3p
+; (desc 12) -&gt; (2 2 3)
+; (desc 7) -&gt; (7)
+; additionaly, format the result by giving (base exponent) pairs - bonus 1p
+;	(desc2 12) -&gt; ((2 2) (3 1))
+;	(desc2 7)  -&gt; ((7 1))
+
+;ro
+
+; 1. eliminati duplicatele dintr-o lista - 2p
+; (nodup '(1 2 4 2 3)) -&gt; (1 2 4 3) -&gt; bonus 0.5p
+;                      -&gt; (1 4 2 3)
+
+; 2. implementati sortarea prin insertie, cu comparatorul dat ca parametru - 2p
+; (isortc &lt; '(1 4 2 8 5 3)) -&gt; (1 2 3 4 5 8)
+; (isortc &gt; '(1 4 2 8 5 3)) -&gt; (8 5 4 3 2 1)
+
+; 3. scrieti o functie care intoarce toate numerele prime dintr-un interval - 3p
+; (primes 5 19) -&gt; (5 7 11 13 17)
+
+; 4. scrieti o functie care determina descompunerea unui numar in factori primi - 3p
+; (desc 12) -&gt; (2 2 3)
+; (desc 7) -&gt; (7)
+; suplimentar, formatati rezultatul ca perechi (baza exponent) - bonus 1p
+;	(desc2 12) -&gt; ((2 2) (3 1))
+;	(desc2 7)  -&gt; ((7 1))
+
+</pre></body></html>
