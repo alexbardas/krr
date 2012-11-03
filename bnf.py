@@ -1,5 +1,7 @@
 import sys
 
+from ftree import FTree
+
 priority = ['not', 'and', 'or', '->', '<->']
 
 tree = {}
@@ -33,9 +35,7 @@ def read_formulas(input):
             if c in ['p', 'q', 'r', 's', 't', 'u', 'v']:
                 formula += ws + c
                 prop.add(c)
-            elif c == ' ':
-                continue
-            elif c == '\n':
+            elif c in [' ', '\n']:
                 continue
             elif c in ['!', '&', '|']:
                 formula += ws + maps[c]
@@ -169,10 +169,94 @@ def add_parentheses(formula, idx=0):
 
     return formula
 
+def evaluate(formula):
+    """
+    Given a formula, it evaluates it and obtains a FormulaTree (FTree)
+    representation
+
+    Having the tree, it is easier to evaluate all formula's states
+    :param string formula: the formula to be evaluated
+    """
+
+    # Construct a tree from the given formula, to evaluate it easier
+    #operators = ['and', 'or', '->', '<->']
+    formula = formula.split(' ')
+    print formula
+    opened_brackets = 0
+    closed_brackets = 0
+    for idx in range(0, len(formula)):
+        # Count the number of opened and closed brackets, while
+        # traversing the formula
+        opened_brackets += formula[idx].count('(')
+        closed_brackets += formula[idx].count(')')
+
+        #print opened_brackets, closed_brackets
+
+        if opened_brackets == closed_brackets:
+            # This expression must be minimum
+            if len(formula) > 3:
+                assert Exception('Invalid formula')
+            else:
+                if len(formula) == 1:
+                    return FTree(formula[0].replace('(', '').replace(')', ''))
+                if len(formula) == 2:
+                    return FTree(formula[0].replace('(', ''),
+                                 left=FTree(formula[1].replace(')', '')))
+                else:
+                    left = formula[0].replace('(', '')
+                    right = formula[2].replace(')', '')
+                    return FTree(formula[1], left=FTree(left), right=FTree(right))
+
+
+        # There seems to be 2 cases:
+        #   a. formula operator proposition / formula operator formula
+        #   b. proposition operator formula
+        # TODO: Check if there is only one state for both cases
+
+        if (opened_brackets - closed_brackets == 1) and (closed_brackets > 0):
+            # There must be at least 2 expressions, separated by an operator
+            operator = formula[idx+1]
+            # Remove the first parenthesis of the left side of the expression
+            left = formula[0][1:] + ' ' + ' '.join(formula[1:idx+1])
+            # Remove the last parenthesis of the right side of the expression
+            right = ' '.join(formula[idx+2:])
+            if right[-1] == ')': right = right[:-1]
+
+            if len(formula) - idx == 3:
+                return FTree(operator, left=evaluate(left), right=FTree(right))
+            else:
+                return FTree(operator, left=evaluate(left), right=evaluate(right))
+        elif (opened_brackets - closed_brackets == 1 and idx < len(formula) and
+                formula[idx+1].count('(') > 0):
+            operator = formula[idx].replace('(', '')
+            # Remove the first parenthesis of the left side of the expression
+            if idx == 0:
+                # The operator must be not and there is no left proposition
+                assert formula[idx].endswith('not')
+                left = ' '.join(formula[idx+1:])
+                if left[-1] == ')' : left = left[:-1]
+                right = None
+            else:
+                left = ' '.join(formula[0:idx])
+                if left[0] == '(': left = left[1:]
+                # Remove the last parenthesis of the right side of the expression
+                right = ' '.join(formula[idx+1:])
+                if right[-1] == ')': right = right[:-1]
+
+
+            if idx == 0 and operator == 'not':
+                return FTree(operator, left=evaluate(left))
+            if idx == 1:
+                return FTree(operator, left=FTree(left), right=evaluate(right))
+            else:
+                return FTree(operator, left=evaluate(left), right=evaluate(right))
+
 def main(formulas):
-    for formula in formulas:
+    for idx, formula in enumerate(formulas):
         formula = parse_formula(formula.split(' '))
-        print formula
+        ev = evaluate(formula[0])
+        ev.propositions = propositions[idx]
+        ev.eval()
 
 
 if __name__ == '__main__':
