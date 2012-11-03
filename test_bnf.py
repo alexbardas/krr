@@ -1,4 +1,5 @@
-from bnf import match_parentheses, add_parentheses, parse_formula, evaluate, FTree
+from bnf import match_parentheses, add_parentheses, parse_formula, evaluate
+from ftree import FTree
 
 formulas = \
     [
