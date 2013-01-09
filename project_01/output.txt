@@ -1,0 +1,7 @@
+1
+MODEL m1
+WORLDS w1 w2 w3
+RELATIONS (w1, w2) (w2, w1) (w2, w3)
+True w3 : p q r
+True w2 : p s
+True w1 : p q r s

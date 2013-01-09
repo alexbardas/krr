@@ -1,0 +1,18 @@
+1
+MODEL m
+WORLDS w_1 w_2 w_3 w_4 w_5 w_6 w_7 w_8 w_9 w_10 w_11 w_12 w_13 w_14
+RELATIONS (w_2, w_5) (w_2, w_6) (w_2, w_7) (w_2, w_8) (w_2, w_14) (w_4, w_6) (w_4, w_11) (w_4, w_12) (w_4, w_13) (w_6, w_3) (w_6, w_4) (w_7, w_10) (w_8, w_3) (w_8, w_10) (w_10, w_9) (w_10, w_10) (w_10, w_11) (w_10, w_12) (w_10, w_13) (w_10, w_14) (w_12, w_3) (w_13, w_10) (w_14, w_3) (w_14 w_10)
+TRUE w_1 : in
+TRUE w_2 : in
+TRUE w_3 : in
+TRUE w_4 : in
+TRUE w_5 : out
+TRUE w_6 : out
+TRUE w_7 : out
+TRUE w_8 : out
+TRUE w_9 : undec
+TRUE w_10 : undec
+TRUE w_11 : out
+TRUE w_12 : out
+TRUE w_13 : out
+TRUE w_14 : outs
