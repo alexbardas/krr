@@ -1,4 +1,9 @@
+from bnf import evaluate
+from ftree import FTree
+from drawing import export_model
+
 models = {}
+formulas = {}
 current_model = None
 
 availableCommands = [
@@ -6,7 +11,6 @@ availableCommands = [
 
     'CREATE MODEL', 'REMOVE MODEL', 'LIST MODELS',
     'SHOW MODEL', 'SHOW ALL MODELS', 'EDIT MODEL',
-    'SHOW',
 
     'ADD RELATIONS', 'REMOVE RELATIONS', 'CLEAR RELATIONS',
 
@@ -16,7 +20,16 @@ availableCommands = [
     'ADD WORLDS', 'REMOVE WORLDS', 'RENAME WORLD',
     'CLEAR',
 
-    'LOAD MODELS FROM', 'SAVE MODELS TO'];
+    'LOAD MODELS FROM', 'SAVE MODELS TO',
+
+    # formula commands
+    'CREATE FORMULA', 'SHOW FORMULA', 'EVALUATE',
+
+    # model commands
+    'SHOW',
+
+    # extra commands
+    'EXPORT MODEL', '#'];
 
 messages = {
     'unopen_model': 'No model is currently open for editing. Use the EDIT command first.'
@@ -52,6 +65,20 @@ def new_model(name=None):
 
     return model
 
+def eval_formula(formula, model, world, steps=None):
+    tree_formula = evaluate(formula)
+    # Compute the list of neighbours for all worlds
+    next = {}
+    for any_world in model['worlds']:
+        next[any_world] = [w[1] for w in model['relation'] if w[0] == any_world]
+    setattr(FTree, 'next', next)
+    setattr(FTree, 'truth', model['truth'])
+    setattr(FTree, 'relation', model['relation'])
+    if steps:
+        return tree_formula.justify(world, steps)
+    else:
+        return tree_formula.compute(world)
+
 def execute_cmd(command):
     global current_model
     # Execute a given command in a specific context
@@ -59,6 +86,10 @@ def execute_cmd(command):
     for cmd in availableCommands:
         # Commands for manipulating the model dict
         if command.startswith(cmd):
+
+            # Comment, ignore it
+            if cmd == '#':
+                break
 
             if cmd == 'EXECUTE COMMANDS FROM':
                 file_name = command[len(cmd)+1:]
@@ -317,11 +348,90 @@ def execute_cmd(command):
                     save_models_to_file(models, f)
                 except Exception, e:
                     pass
+
+
+            # PART 2: Modal formulas
+
+            elif cmd == 'CREATE FORMULA':
+                formula = command[len(cmd)+1:]
+                formula = formula.split(' = ')
+                formula_name = formula[0]
+                formula = formula[1]
+                idx = formula.find('$')
+                while idx >= 0:
+                    # between the $ sign and the first ' ' or line end, there must
+                    # be another defined formula
+                    first_space = formula.find(' ', idx+1)
+                    if first_space == -1:
+                        first_space = len(formula)
+                    other_formula = formula[idx+1:first_space]
+                    print other_formula
+                    if not other_formula in formulas:
+                        print 'Formula %s not found.' % other_formula
+                        break
+
+                    formula = formula[:idx] + formulas[other_formula] + formula[first_space:]
+                    idx = formula.find('$')
+                if idx == -1:
+                    formulas[formula_name] = formula
+
+            elif cmd == 'SHOW FORMULA':
+                formula = command[len(cmd)+1:]
+                if not formula in formulas:
+                    print 'Formula %s not found.' % formula
+                else:
+                    print formulas[formula]
+
+            elif cmd == 'EVALUATE':
+                expression = command[len(cmd)+1:].split(' ')
+                formula_name = expression[0]
+                model_name = expression[2]
+                if not formula_name in formulas:
+                    print 'Formula %s not found.' % formula_name
+                    break
+                if not model_name in models:
+                    print 'Model %s not found.' % model_name
+                    break
+
+                formula = formulas[formula_name]
+                model = models[model_name]
+                # Evalueate the formula at all worlds
+                if len(expression) == 3:
+                    true_formula_for_worlds = []
+                    for world in model['worlds']:
+                        if eval_formula(formula, model, world):
+                            true_formula_for_worlds.append(world)
+                    print '{ %s }' % ', '.join(true_formula_for_worlds)
+
+                elif len(expression) == 5:
+                    world = expression[4]
+                    if not world in models[model_name]['worlds']:
+                        print 'World %s not found in the model %s.' % (world, model_name)
+                        break
+                    print eval_formula(formula, model, world)
+                # justification
+                elif len(expression) == 7:
+                    world = expression[4]
+                    steps = expression[6]
+                    if steps == 'ALL':
+                        steps = -1
+                    return eval_formula(formula, model, world, steps=int(steps))
+
+            # Extra commands
+            elif cmd == 'EXPORT MODEL':
+                command = command[len(cmd)+1:].split(' ')
+                model_name = command[0]
+                file_name = command[2]
+                if not model_name in models:
+                    print 'Model %s not found.' % model_name
+                    break
+                export_model(models[model_name], file_name)
+
             break
 
 def tests():
     # Insanity tests
-    # execute_cmd('CREATE MODEL m1')
+    execute_cmd('CREATE MODEL m1')
     # execute_cmd('CREATE MODEL m2')
     # execute_cmd('REMOVE MODEL m3')
     # execute_cmd('CREATE MODEL m3 FORCE')
@@ -330,27 +440,43 @@ def tests():
     # execute_cmd('SHOW MODEL m1')
     # execute_cmd('SHOW ALL MODELS')
     # execute_cmd('EDIT MODEL m4')
-    # execute_cmd('EDIT MODEL m1')
-    # execute_cmd('ADD WORLDS w1 w2 w3')
+    execute_cmd('EDIT MODEL m1')
+    execute_cmd('ADD WORLDS w1 w2 w3')
     # execute_cmd('REMOVE WORLDS w2')
     # #execute_cmd('CLEAR')
 
-    # execute_cmd('ADD RELATIONS w1 w2 w2 w3 w1 w3')
+    execute_cmd('ADD RELATIONS w1 w2 w2 w3 w1 w3')
     # execute_cmd('REMOVE RELATIONS w1 w3')
     # #execute_cmd('CLEAR RELATIONS')
     # execute_cmd('SHOW')
 
+    execute_cmd('ADD TRUE p q AT w1')
+    execute_cmd('ADD TRUE q AT w2')
+
     # execute_cmd('LOAD MODELS FROM baietel.txt')
-    execute_cmd('LOAD MODELS FROM input.txt')
-    execute_cmd('SAVE MODELS TO baietel.txt')
+    #execute_cmd('LOAD MODELS FROM input.txt')
+    #execute_cmd('SAVE MODELS TO baietel.txt')
     #print models
+
+    execute_cmd('CREATE FORMULA f1 = p')
+    execute_cmd('CREATE FORMULA f2 = p & ~ q')
+    execute_cmd('CREATE FORMULA f3 = <> (p & [] (q | ~ r))')
+    execute_cmd('CREATE FORMULA f4 = $f1 & $f2')
+
+    #execute_cmd('SHOW FORMULA f1')
+    #execute_cmd('SHOW FORMULA f2')
+    #execute_cmd('SHOW FORMULA f3')
+    execute_cmd('SHOW FORMULA f4')
+
+    execute_cmd('EVALUATE f1 IN m1 AT w1')
+    execute_cmd('EVALUATE f4 IN m1')
 
 def main():
     command = ''
     while command != 'EXIT':
         command = raw_input('$ ')
-        print command
         execute_cmd(command)
+    #execute_cmd('EXECUTE COMMANDS FROM commands.txt')
 
 if __name__ == '__main__':
     #tests()
